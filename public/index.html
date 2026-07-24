@@ -29,10 +29,12 @@
             <label>
               <span><b class="person a">A</b> Your starting point</span>
               <input id="person-a" placeholder="e.g. UCL, London" required />
+              <button class="location-button" type="button" data-location-target="person-a">◎ Use my current location</button>
             </label>
             <label>
               <span><b class="person b">B</b> Their starting point</span>
               <input id="person-b" placeholder="e.g. London Bridge" required />
+              <button class="location-button" type="button" data-location-target="person-b">◎ Use my current location</button>
             </label>
           </div>
 
@@ -42,6 +44,10 @@
           </label>
 
           <div class="controls">
+            <label>
+              <span>Meeting time</span>
+              <input id="meeting-time" type="datetime-local" required />
+            </label>
             <label>
               <span>Travel mode</span>
               <select id="travel-mode">
@@ -63,10 +69,36 @@
             <button type="submit"><span>Find our spot</span><span>→</span></button>
           </div>
         </form>
+        <div class="invite-row">
+          <div>
+            <strong>Don't know their location?</strong>
+            <span>Create a link so they can share it themselves.</span>
+          </div>
+          <input id="organizer-name" maxlength="50" placeholder="Your name" />
+          <button id="create-meeting" type="button">Create invite link →</button>
+        </div>
+        <div id="invite-link" class="invite-link hidden"></div>
+      </section>
+
+      <section id="join-panel" class="planner join-panel hidden">
+        <p class="eyebrow">YOU'VE BEEN INVITED</p>
+        <h2><span id="host-name"></span> wants to meet</h2>
+        <p id="meeting-description" class="intro"></p>
+        <label>
+          <span>Your name</span>
+          <input id="guest-name" maxlength="50" placeholder="e.g. Sarah" />
+        </label>
+        <label class="request">
+          <span>Your starting point</span>
+          <input id="guest-location" placeholder="Address, station, or postcode" />
+          <button class="location-button" type="button" data-location-target="guest-location">◎ Use my current location</button>
+        </label>
+        <button id="join-meeting" type="button">Share location and find our spot →</button>
       </section>
 
       <section id="status" class="status hidden" aria-live="polite"></section>
       <section id="results" class="results hidden">
+        <aside id="weather" class="weather"></aside>
         <div class="results-heading">
           <div><p class="eyebrow">BEST COMPROMISES</p><h2>Your meeting spots</h2></div>
           <p id="route-summary"></p>

@@ -21,6 +21,7 @@ Required enabled APIs:
 
 - Places API (New)
 - Routes API
+- Weather API
 
 The browser key is not needed in this first version because recommendations link
 to Google Maps rather than embedding a map.

@@ -5,10 +5,16 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "check": "node --check server.js && node --check public/app.js"
+    "check": "node --check server.js && node --check public/app.js",
+    "build": "next build",
+    "build:cloudflare": "opennextjs-cloudflare build"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.8.2",
     "dotenv": "^17.2.1",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "next": "^15.4.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }
