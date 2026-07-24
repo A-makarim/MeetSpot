@@ -489,6 +489,11 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
       await navigator.clipboard.writeText(url);
       document.querySelector("#copy-invite").textContent = "Copied ✓";
     });
+    document.querySelector(".open-room").addEventListener("click", (event) => {
+      event.preventDefault();
+      history.pushState({}, "", `/?room=${encodeURIComponent(room.id)}`);
+      loadGroupRoom(room.id);
+    });
     statusBox.classList.add("hidden");
   } catch (error) {
     setStatus(
@@ -547,10 +552,10 @@ async function loadInvitation(meetingId) {
 }
 
 async function loadGroupRoom(roomId) {
-  hero.classList.add("hidden");
-  planner.classList.add("hidden");
+  document.querySelectorAll(".page-view").forEach((view) => view.classList.add("hidden"));
   document.querySelector(".page-tabs").classList.add("hidden");
   joinPanel.classList.remove("hidden");
+  document.documentElement.classList.remove("room-route");
   setStatus("Loading group room…", "loading");
 
   const roomRef = doc(firestore, "meetings", roomId);
