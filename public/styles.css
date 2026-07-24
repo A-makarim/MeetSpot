@@ -11,10 +11,22 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: "DM Sans", sans-serif; }
 .nav { height: 74px; display: flex; align-items: center; justify-content: space-between; max-width: 1160px; padding: 0 28px; margin: auto; }
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.auth-button, .secondary-button { background: white; color: var(--ink); border: 1px solid var(--line); padding: 9px 13px; }
+.auth-button:hover, .secondary-button:hover { background: #eef0e8; }
 .brand { color: var(--ink); text-decoration: none; font-family: Manrope; font-size: 22px; font-weight: 800; }
 .brand span { color: var(--orange); font-size: 29px; vertical-align: -2px; }
 .badge { border: 1px solid var(--line); border-radius: 30px; padding: 8px 13px; color: var(--muted); font-size: 12px; }
 main { max-width: 1060px; margin: auto; padding: 54px 28px 80px; }
+.profile-panel { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; margin-bottom: 42px; box-shadow: 0 18px 60px rgba(30,50,40,.08); }
+.profile-heading { display: flex; justify-content: space-between; gap: 20px; align-items: start; }
+.profile-intro { color: var(--muted); }
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 22px 0; }
+.timeline-box { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; border-top: 1px solid var(--line); margin-top: 25px; padding-top: 22px; }
+.timeline-box p { color: var(--muted); margin: 5px 0 0; font-size: 13px; }
+.file-button { background: #eaf4ed; color: var(--green); border-radius: 10px; padding: 11px 14px; font-weight: 700; cursor: pointer; }
+.file-button input { display: none; }
+.timeline-status { grid-column: 1 / -1; }
 .hero { max-width: 770px; margin-bottom: 42px; }
 .eyebrow { color: var(--green); font-weight: 700; font-size: 12px; letter-spacing: .14em; margin: 0 0 13px; }
 h1 { font-family: Manrope; font-size: clamp(48px, 7vw, 82px); line-height: .98; letter-spacing: -.055em; margin: 0; }
@@ -73,4 +85,5 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 30px
   .results-heading > p { text-align: left; }
   .badge { display: none; }
   .invite-row { grid-template-columns: 1fr; }
+  .profile-grid, .timeline-box { grid-template-columns: 1fr; }
 }

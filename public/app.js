@@ -1,3 +1,32 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import {
+  doc,
+  getDoc,
+  getFirestore,
+  serverTimestamp,
+  setDoc,
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+const firebaseApp = initializeApp({
+  apiKey: "AIzaSyCKaLW7BHJVj7VUvi1MbrkjmB3rwcuADEQ",
+  authDomain: "uk-stud-ai-hack26lhr-5702.firebaseapp.com",
+  projectId: "uk-stud-ai-hack26lhr-5702",
+  storageBucket: "uk-stud-ai-hack26lhr-5702.firebasestorage.app",
+  messagingSenderId: "234754526011",
+  appId: "1:234754526011:web:d7ba91c97a7bb78dd7451e",
+});
+const auth = getAuth(firebaseApp);
+const firestore = getFirestore(firebaseApp);
+const googleProvider = new GoogleAuthProvider();
+let currentUser = null;
+
 const form = document.querySelector("#search-form");
 const planner = document.querySelector(".planner");
 const hero = document.querySelector(".hero");
@@ -8,6 +37,8 @@ const cards = document.querySelector("#cards");
 const summary = document.querySelector("#route-summary");
 const weatherBox = document.querySelector("#weather");
 const meetingInput = document.querySelector("#meeting-time");
+const profilePanel = document.querySelector("#profile-panel");
+const authButton = document.querySelector("#auth-button");
 
 const defaultMeetingTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
 defaultMeetingTime.setMinutes(
@@ -18,6 +49,189 @@ defaultMeetingTime.setMinutes(
 meetingInput.value = new Date(
   defaultMeetingTime.getTime() - defaultMeetingTime.getTimezoneOffset() * 60000
 ).toISOString().slice(0, 16);
+
+const profileFields = [
+  "dietary",
+  "accessibility",
+  "cuisines",
+  "activities",
+  "budget",
+  "atmosphere",
+];
+
+function showProfile() {
+  profilePanel.classList.remove("hidden");
+  profilePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function loadProfile(user) {
+  const snapshot = await getDoc(doc(firestore, "users", user.uid));
+  if (!snapshot.exists()) {
+    showProfile();
+    return;
+  }
+  const profile = snapshot.data().preferences || {};
+  profileFields.forEach((field) => {
+    if (profile[field] != null) document.querySelector(`#${field}`).value = profile[field];
+  });
+  const timeline = snapshot.data().timelineSummary;
+  if (timeline) {
+    document.querySelector("#timeline-status").textContent =
+      `Timeline processed: ${timeline.visitCount} visits and ${timeline.activityCount} activities summarised.`;
+  }
+}
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  if (!user) {
+    authButton.textContent = "Sign in with Google";
+    profilePanel.classList.add("hidden");
+    return;
+  }
+  authButton.textContent = `${user.displayName?.split(" ")[0] || "My"} profile`;
+  try {
+    await loadProfile(user);
+  } catch (error) {
+    setStatus(`Profile could not load: ${error.message}`);
+  }
+});
+
+authButton.addEventListener("click", async () => {
+  if (currentUser) {
+    showProfile();
+    return;
+  }
+  try {
+    await signInWithPopup(auth, googleProvider);
+  } catch (error) {
+    setStatus(`Google sign-in failed: ${error.message}`);
+  }
+});
+
+document.querySelector("#close-profile").addEventListener("click", () => {
+  profilePanel.classList.add("hidden");
+});
+
+document.querySelector("#sign-out").addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+document.querySelector("#profile-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!currentUser) return;
+  const preferences = Object.fromEntries(
+    profileFields.map((field) => [field, document.querySelector(`#${field}`).value.trim()])
+  );
+  try {
+    await setDoc(
+      doc(firestore, "users", currentUser.uid),
+      {
+        email: currentUser.email,
+        displayName: currentUser.displayName,
+        photoURL: currentUser.photoURL,
+        preferences,
+        profileCompleted: true,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    setStatus("Your preferences are saved.");
+    profilePanel.classList.add("hidden");
+  } catch (error) {
+    setStatus(`Preferences could not be saved: ${error.message}`);
+  }
+});
+
+function processTimeline(document) {
+  const timelineObjects = Array.isArray(document.timelineObjects)
+    ? document.timelineObjects
+    : [];
+  const semanticSegments = Array.isArray(document.semanticSegments)
+    ? document.semanticSegments
+    : [];
+  const locations = Array.isArray(document.locations) ? document.locations : [];
+  const placeNames = new Map();
+  const activityTypes = new Map();
+  let visitCount = 0;
+  let activityCount = 0;
+
+  for (const item of timelineObjects) {
+    if (item.placeVisit) {
+      visitCount += 1;
+      const name =
+        item.placeVisit.location?.name || item.placeVisit.location?.address;
+      if (name) placeNames.set(name, (placeNames.get(name) || 0) + 1);
+    }
+    if (item.activitySegment) {
+      activityCount += 1;
+      const type = item.activitySegment.activityType;
+      if (type) activityTypes.set(type, (activityTypes.get(type) || 0) + 1);
+    }
+  }
+  for (const segment of semanticSegments) {
+    const visit = segment.visit || segment.placeVisit;
+    const activity = segment.activity || segment.activitySegment;
+    if (visit) {
+      visitCount += 1;
+      const name =
+        visit.topCandidate?.placeId ||
+        visit.topCandidate?.semanticType ||
+        visit.location?.name;
+      if (name) placeNames.set(name, (placeNames.get(name) || 0) + 1);
+    }
+    if (activity) {
+      activityCount += 1;
+      const type = activity.topCandidate?.type || activity.activityType;
+      if (type) activityTypes.set(type, (activityTypes.get(type) || 0) + 1);
+    }
+  }
+  const top = (map, limit) =>
+    [...map.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([value, count]) => ({ value, count }));
+  return {
+    visitCount,
+    activityCount,
+    rawLocationRecordCount: locations.length,
+    topPlaces: top(placeNames, 12),
+    activityTypes: top(activityTypes, 10),
+    processedAt: new Date().toISOString(),
+    rawFileStored: false,
+  };
+}
+
+document.querySelector("#timeline-file").addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  const timelineStatus = document.querySelector("#timeline-status");
+  if (!file || !currentUser) return;
+  if (file.size > 100 * 1024 * 1024) {
+    timelineStatus.textContent = "Choose a JSON export smaller than 100 MB.";
+    return;
+  }
+  timelineStatus.textContent = "Processing locally…";
+  try {
+    const timelineDocument = JSON.parse(await file.text());
+    const timelineSummary = processTimeline(timelineDocument);
+    if (
+      !timelineSummary.visitCount &&
+      !timelineSummary.activityCount &&
+      !timelineSummary.rawLocationRecordCount
+    ) {
+      throw new Error("No supported Timeline records were found");
+    }
+    await setDoc(
+      doc(firestore, "users", currentUser.uid),
+      { timelineSummary, updatedAt: serverTimestamp() },
+      { merge: true }
+    );
+    timelineStatus.textContent =
+      `Done: ${timelineSummary.visitCount} visits and ${timelineSummary.activityCount} activities summarised. Raw JSON was not uploaded.`;
+    event.target.value = "";
+  } catch (error) {
+    timelineStatus.textContent = `Timeline processing failed: ${error.message}`;
+  }
+});
 
 function escapeHtml(value = "") {
   return String(value).replace(

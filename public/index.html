@@ -13,10 +13,75 @@
   <body>
     <header class="nav">
       <a class="brand" href="/"><span>●</span> MeetSpot</a>
-      <span class="badge">Live Google results</span>
+      <div class="nav-actions">
+        <span class="badge">Live Google results</span>
+        <button id="auth-button" class="auth-button" type="button">Sign in with Google</button>
+      </div>
     </header>
 
     <main>
+      <section id="profile-panel" class="profile-panel hidden">
+        <div class="profile-heading">
+          <div>
+            <p class="eyebrow">YOUR MEETSPOT PROFILE</p>
+            <h2>Make every suggestion feel like you.</h2>
+          </div>
+          <div class="nav-actions">
+            <button id="sign-out" class="secondary-button" type="button">Sign out</button>
+            <button id="close-profile" class="secondary-button" type="button">Close</button>
+          </div>
+        </div>
+        <p class="profile-intro">Set hard requirements and preferences once. You can change them whenever you want.</p>
+        <form id="profile-form">
+          <div class="profile-grid">
+            <label>
+              <span>Dietary requirements</span>
+              <input id="dietary" placeholder="e.g. halal, vegetarian, allergies" />
+            </label>
+            <label>
+              <span>Accessibility requirements</span>
+              <input id="accessibility" placeholder="e.g. step-free, wheelchair accessible" />
+            </label>
+            <label>
+              <span>Favourite cuisines</span>
+              <input id="cuisines" placeholder="e.g. Japanese, Turkish, Italian" />
+            </label>
+            <label>
+              <span>Activities you enjoy</span>
+              <input id="activities" placeholder="e.g. bowling, museums, parks" />
+            </label>
+            <label>
+              <span>Typical budget</span>
+              <select id="budget">
+                <option value="budget">Budget-friendly</option>
+                <option value="moderate" selected>Moderate</option>
+                <option value="flexible">Flexible</option>
+              </select>
+            </label>
+            <label>
+              <span>Preferred atmosphere</span>
+              <select id="atmosphere">
+                <option value="quiet">Quiet and relaxed</option>
+                <option value="balanced" selected>Balanced</option>
+                <option value="lively">Lively and social</option>
+              </select>
+            </label>
+          </div>
+          <button type="submit">Save my preferences →</button>
+        </form>
+        <div class="timeline-box">
+          <div>
+            <strong>Optional: learn from your Google Timeline</strong>
+            <p>The JSON is processed once in this browser. Only a compact summary is saved; the raw file is never uploaded.</p>
+          </div>
+          <label class="file-button">
+            Process Timeline JSON
+            <input id="timeline-file" type="file" accept=".json,application/json" />
+          </label>
+          <p id="timeline-status" class="timeline-status"></p>
+        </div>
+      </section>
+
       <section class="hero">
         <p class="eyebrow">NO MORE “WHERE SHOULD WE MEET?”</p>
         <h1>A place that works<br /><em>for both of you.</em></h1>
@@ -107,6 +172,6 @@
       </section>
     </main>
     <footer>Powered by Google Maps Platform</footer>
-    <script src="/app.js"></script>
+    <script type="module" src="/app.js"></script>
   </body>
 </html>
