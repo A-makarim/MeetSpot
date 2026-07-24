@@ -408,6 +408,7 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
     : "";
   const travelMode = document.querySelector("#group-travel-mode").value;
   const maxMinutes = Number(document.querySelector("#group-max-minutes").value);
+  const expectedParticipants = Number(document.querySelector("#group-size").value);
   if (!organizerName || !organizerLocation || !preference || !meetingTime) {
     setStatus("Add your name, your location, the request, and meeting time first.");
     return;
@@ -424,6 +425,7 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
       meetingTime,
       travelMode,
       maxMinutes,
+      expectedParticipants,
       participants: [{
         uid: currentUser.uid,
         name: organizerName,
@@ -437,7 +439,10 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
     invite.innerHTML = `
       <strong>Group room ready.</strong> Send the same link to everyone:<br />
       <a href="${escapeHtml(url)}">${escapeHtml(url)}</a>
-      <button id="copy-invite" type="button">Copy link</button>
+      <div class="invite-actions">
+        <button id="copy-invite" type="button">Copy link</button>
+        <a class="open-room" href="${escapeHtml(url)}">Open room</a>
+      </div>
     `;
     invite.classList.remove("hidden");
     document.querySelector("#copy-invite").addEventListener("click", async () => {
@@ -520,11 +525,17 @@ async function loadGroupRoom(roomId) {
         }
         latestRoom = snapshot.data();
         const participants = latestRoom.participants || [];
+        const expected = Number(latestRoom.expectedParticipants) || 2;
+        const alreadyJoined = participants.some((person) => person.uid === currentUser?.uid);
+        joinPanel.querySelectorAll(":scope > label").forEach((label) => {
+          label.classList.toggle("hidden", alreadyJoined);
+        });
+        document.querySelector("#join-meeting").classList.toggle("hidden", alreadyJoined);
         document.querySelector("#host-name").textContent = latestRoom.organizerName;
         document.querySelector("#meeting-description").textContent =
-          `${participants.length} participant${participants.length === 1 ? "" : "s"} · ${new Date(latestRoom.meetingTime).toLocaleString()} · maximum ${latestRoom.maxMinutes} minutes`;
+          `${participants.length} of ${expected} joined · ${new Date(latestRoom.meetingTime).toLocaleString()} · maximum ${latestRoom.maxMinutes} minutes`;
         document.querySelector("#room-members").innerHTML = `
-          <strong>Group preferences</strong>
+          <strong>${participants.length >= expected ? "Everyone is here" : `Waiting for ${expected - participants.length} more`}</strong>
           ${participants.map((person) => `<p><b>${escapeHtml(person.name)}</b> — ${escapeHtml(person.preference)}</p>`).join("")}
         `;
         statusBox.classList.add("hidden");
@@ -566,8 +577,20 @@ async function loadGroupRoom(roomId) {
         location: guestLocation,
         preference: guestPreference,
       };
+      const existingParticipants = latestRoom?.participants || [];
+      if (existingParticipants.some((person) => person.uid === currentUser.uid)) {
+        throw new Error("You have already joined this room.");
+      }
+      const expected = Number(latestRoom?.expectedParticipants) || 2;
+      if (existingParticipants.length >= expected) {
+        throw new Error("This room already has everyone it was created for.");
+      }
       await updateDoc(roomRef, { participants: arrayUnion(participant) });
-      const participants = [...(latestRoom?.participants || []), participant];
+      const participants = [...existingParticipants, participant];
+      if (participants.length < expected) {
+        setStatus(`You joined. Waiting for ${expected - participants.length} more participant${expected - participants.length === 1 ? "" : "s"}…`);
+        return;
+      }
       const combinedPreference = [...new Set(participants.map((person) => person.preference))]
         .join(" or ");
       const response = await fetch("/api/recommend", {
