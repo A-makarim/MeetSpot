@@ -594,4 +594,6 @@ async function loadGroupRoom(roomId) {
 const invitationMatch = window.location.pathname.match(/^\/m\/([A-Za-z0-9_-]+)$/);
 if (invitationMatch) loadInvitation(invitationMatch[1]);
 const roomMatch = window.location.pathname.match(/^\/r\/([A-Za-z0-9_-]+)$/);
+const roomQuery = new URLSearchParams(window.location.search).get("room");
 if (roomMatch) loadGroupRoom(roomMatch[1]);
+else if (roomQuery && /^[A-Za-z0-9_-]+$/.test(roomQuery)) loadGroupRoom(roomQuery);
