@@ -25,3 +25,6 @@ Required enabled APIs:
 
 The browser key is not needed in this first version because recommendations link
 to Google Maps rather than embedding a map.
+
+Production hosting uses the OpenNext bundle and the tracked `wrangler.jsonc`
+runtime configuration.
