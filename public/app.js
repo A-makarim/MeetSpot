@@ -317,7 +317,7 @@ function renderResults(data, participantNames = ["A", "B"]) {
   }
   statusBox.classList.add("hidden");
   summary.textContent = "Private locations · shared journey comparison";
-  if (data.aiDecision) {
+  if (aiChoiceBox && data.aiDecision) {
     aiChoiceBox.innerHTML = `
       <div class="ai-kicker">✦ GEMINI GROUP PICK</div>
       <h2>${escapeHtml(data.aiDecision.selectedPlace)}</h2>
@@ -326,7 +326,7 @@ function renderResults(data, participantNames = ["A", "B"]) {
       <small>Trade-off: ${escapeHtml(data.aiDecision.tradeoff)}</small>
     `;
     aiChoiceBox.classList.remove("hidden");
-  } else {
+  } else if (aiChoiceBox) {
     aiChoiceBox.classList.add("hidden");
   }
   weatherBox.innerHTML = data.weather
