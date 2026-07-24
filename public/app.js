@@ -432,7 +432,7 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
       }],
       createdAt: serverTimestamp(),
     });
-    const url = `${window.location.origin}/r/${room.id}`;
+    const url = `${window.location.origin}/?room=${encodeURIComponent(room.id)}`;
     const invite = document.querySelector("#invite-link");
     invite.innerHTML = `
       <strong>Group room ready.</strong> Send the same link to everyone:<br />
