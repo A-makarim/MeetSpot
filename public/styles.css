@@ -12,6 +12,9 @@
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: "DM Sans", sans-serif; }
 .nav { height: 74px; display: flex; align-items: center; justify-content: space-between; max-width: 1160px; padding: 0 28px; margin: auto; }
 .nav-actions { display: flex; align-items: center; gap: 10px; }
+.page-tabs { display: flex; gap: 4px; padding: 4px; background: #e9ebe3; border-radius: 12px; }
+.tab-button { background: transparent; color: var(--muted); padding: 8px 13px; border-radius: 9px; }
+.tab-button:hover, .tab-button.active { background: white; color: var(--ink); }
 .auth-button, .secondary-button { background: white; color: var(--ink); border: 1px solid var(--line); padding: 9px 13px; }
 .auth-button:hover, .secondary-button:hover { background: #eef0e8; }
 .brand { color: var(--ink); text-decoration: none; font-family: Manrope; font-size: 22px; font-weight: 800; }
@@ -27,6 +30,11 @@ main { max-width: 1060px; margin: auto; padding: 54px 28px 80px; }
 .file-button { background: #eaf4ed; color: var(--green); border-radius: 10px; padding: 11px 14px; font-weight: 700; cursor: pointer; }
 .file-button input { display: none; }
 .timeline-status { grid-column: 1 / -1; }
+.timeline-places { grid-column: 1 / -1; background: #f3f5ee; border-radius: 14px; padding: 16px; }
+.place-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.place-chips span { background: white; border: 1px solid var(--line); border-radius: 999px; padding: 7px 10px; font-size: 12px; }
+.room-members { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 18px; }
+.room-members p { margin: 7px 0; color: var(--muted); }
 .hero { max-width: 770px; margin-bottom: 42px; }
 .eyebrow { color: var(--green); font-weight: 700; font-size: 12px; letter-spacing: .14em; margin: 0 0 13px; }
 h1 { font-family: Manrope; font-size: clamp(48px, 7vw, 82px); line-height: .98; letter-spacing: -.055em; margin: 0; }
@@ -84,6 +92,9 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 30px
   .results-heading { display: block; }
   .results-heading > p { text-align: left; }
   .badge { display: none; }
+  .nav { flex-wrap: wrap; height: auto; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+  .page-tabs { order: 3; width: 100%; }
+  .tab-button { flex: 1; justify-content: center; }
   .invite-row { grid-template-columns: 1fr; }
   .profile-grid, .timeline-box { grid-template-columns: 1fr; }
 }

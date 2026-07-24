@@ -7,11 +7,16 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
+  addDoc,
+  arrayUnion,
+  collection,
   doc,
   getDoc,
   getFirestore,
+  onSnapshot,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const firebaseApp = initializeApp({
@@ -60,8 +65,44 @@ const profileFields = [
 ];
 
 function showProfile() {
-  profilePanel.classList.remove("hidden");
+  showPage("profile");
   profilePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function showPage(page) {
+  document.querySelectorAll(".page-view").forEach((view) => {
+    view.classList.toggle("hidden", view.dataset.page !== page);
+  });
+  document.querySelectorAll(".tab-button").forEach((button) => {
+    button.classList.toggle("active", button.dataset.tab === page);
+  });
+}
+
+document.querySelectorAll(".tab-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.dataset.tab === "profile" && !currentUser) {
+      authButton.click();
+      return;
+    }
+    showPage(button.dataset.tab);
+  });
+});
+
+function renderTimelineSummary(timeline) {
+  const container = document.querySelector("#timeline-places");
+  if (!timeline) {
+    container.classList.add("hidden");
+    return;
+  }
+  document.querySelector("#timeline-status").textContent =
+    `✓ Stored: ${timeline.visitCount} visits and ${timeline.activityCount} activities. Raw JSON was not uploaded.`;
+  const places = timeline.topPlaces || [];
+  container.innerHTML = places.length
+    ? `<strong>Places found in your Timeline</strong><div class="place-chips">${places
+        .map((place) => `<span>${escapeHtml(place.value)} <b>×${place.count}</b></span>`)
+        .join("")}</div>`
+    : "<strong>Timeline stored, but this export did not contain readable place names.</strong>";
+  container.classList.remove("hidden");
 }
 
 async function loadProfile(user) {
@@ -75,10 +116,7 @@ async function loadProfile(user) {
     if (profile[field] != null) document.querySelector(`#${field}`).value = profile[field];
   });
   const timeline = snapshot.data().timelineSummary;
-  if (timeline) {
-    document.querySelector("#timeline-status").textContent =
-      `Timeline processed: ${timeline.visitCount} visits and ${timeline.activityCount} activities summarised.`;
-  }
+  if (timeline) renderTimelineSummary(timeline);
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -109,7 +147,7 @@ authButton.addEventListener("click", async () => {
 });
 
 document.querySelector("#close-profile").addEventListener("click", () => {
-  profilePanel.classList.add("hidden");
+  showPage("find");
 });
 
 document.querySelector("#sign-out").addEventListener("click", async () => {
@@ -136,7 +174,7 @@ document.querySelector("#profile-form").addEventListener("submit", async (event)
       { merge: true }
     );
     setStatus("Your preferences are saved.");
-    profilePanel.classList.add("hidden");
+    showPage("find");
   } catch (error) {
     setStatus(`Preferences could not be saved: ${error.message}`);
   }
@@ -227,6 +265,7 @@ document.querySelector("#timeline-file").addEventListener("change", async (event
     );
     timelineStatus.textContent =
       `Done: ${timelineSummary.visitCount} visits and ${timelineSummary.activityCount} activities summarised. Raw JSON was not uploaded.`;
+    renderTimelineSummary(timelineSummary);
     event.target.value = "";
   } catch (error) {
     timelineStatus.textContent = `Timeline processing failed: ${error.message}`;
@@ -280,10 +319,12 @@ function renderResults(data, participantNames = ["A", "B"]) {
               : ""
           }</h3>
           <p class="address">${escapeHtml(place.address)}</p>
-          <div class="journeys">
-            <span class="journey"><b>${escapeHtml(participantNames[0])}</b> ${place.journeys[0].minutes} min · ${place.journeys[0].distanceKm} km</span>
-            <span class="journey"><b>${escapeHtml(participantNames[1])}</b> ${place.journeys[1].minutes} min · ${place.journeys[1].distanceKm} km</span>
-          </div>
+          <div class="journeys">${place.journeys
+            .map(
+              (journey, journeyIndex) =>
+                `<span class="journey"><b>${escapeHtml(participantNames[journeyIndex] || `Person ${journeyIndex + 1}`)}</b> ${journey.minutes} min · ${journey.distanceKm} km</span>`
+            )
+            .join("")}</div>
           <p class="why">${escapeHtml(place.explanation)}</p>
         </div>
         <a class="maps-link" href="${escapeHtml(place.mapsUrl)}" target="_blank" rel="noopener">View in Maps ↗</a>
@@ -363,31 +404,36 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
     setStatus("Add your name, your location, the request, and meeting time first.");
     return;
   }
-  setStatus("Creating your private invitation…", "loading");
+  if (!currentUser) {
+    setStatus("Sign in with Google first so the group room can be saved.");
+    await signInWithPopup(auth, googleProvider);
+  }
+  setStatus("Creating your group room…", "loading");
   try {
-    const response = await fetch("/api/meetings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        organizerName,
-        organizerLocation: payload.personA,
-        query: payload.query,
-        meetingTime: payload.meetingTime,
-        travelMode: payload.travelMode,
-        maxMinutes: payload.maxMinutes,
-      }),
+    const room = await addDoc(collection(firestore, "meetings"), {
+      organizerUid: currentUser.uid,
+      organizerName,
+      meetingTime: payload.meetingTime,
+      travelMode: payload.travelMode,
+      maxMinutes: Number(payload.maxMinutes),
+      participants: [{
+        uid: currentUser.uid,
+        name: organizerName,
+        location: payload.personA,
+        preference: payload.query,
+      }],
+      createdAt: serverTimestamp(),
     });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Could not create the meeting.");
+    const url = `${window.location.origin}/r/${room.id}`;
     const invite = document.querySelector("#invite-link");
     invite.innerHTML = `
-      <strong>Invite ready.</strong> Send this private link:<br />
-      <a href="${escapeHtml(data.url)}">${escapeHtml(data.url)}</a>
+      <strong>Group room ready.</strong> Send the same link to everyone:<br />
+      <a href="${escapeHtml(url)}">${escapeHtml(url)}</a>
       <button id="copy-invite" type="button">Copy link</button>
     `;
     invite.classList.remove("hidden");
     document.querySelector("#copy-invite").addEventListener("click", async () => {
-      await navigator.clipboard.writeText(data.url);
+      await navigator.clipboard.writeText(url);
       document.querySelector("#copy-invite").textContent = "Copied ✓";
     });
     statusBox.classList.add("hidden");
@@ -443,5 +489,97 @@ async function loadInvitation(meetingId) {
   }
 }
 
+async function loadGroupRoom(roomId) {
+  hero.classList.add("hidden");
+  planner.classList.add("hidden");
+  document.querySelector(".page-tabs").classList.add("hidden");
+  joinPanel.classList.remove("hidden");
+  setStatus("Loading group room…", "loading");
+
+  const roomRef = doc(firestore, "meetings", roomId);
+  let latestRoom = null;
+  const openRoom = () => {
+    onSnapshot(
+      roomRef,
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          setStatus("This meeting room does not exist.");
+          return;
+        }
+        latestRoom = snapshot.data();
+        const participants = latestRoom.participants || [];
+        document.querySelector("#host-name").textContent = latestRoom.organizerName;
+        document.querySelector("#meeting-description").textContent =
+          `${participants.length} participant${participants.length === 1 ? "" : "s"} · ${new Date(latestRoom.meetingTime).toLocaleString()} · maximum ${latestRoom.maxMinutes} minutes`;
+        document.querySelector("#room-members").innerHTML = `
+          <strong>Group preferences</strong>
+          ${participants.map((person) => `<p><b>${escapeHtml(person.name)}</b> — ${escapeHtml(person.preference)}</p>`).join("")}
+        `;
+        statusBox.classList.add("hidden");
+        if (latestRoom.results) {
+          renderResults(latestRoom.results, participants.map((person) => person.name));
+        }
+      },
+      (error) => setStatus(`Room could not load: ${error.message}`)
+    );
+  };
+
+  if (currentUser) openRoom();
+  else {
+    setStatus("Sign in with Google to join this private group room.");
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      unsubscribe();
+      openRoom();
+    });
+  }
+
+  document.querySelector("#join-meeting").addEventListener("click", async () => {
+    if (!currentUser) {
+      await signInWithPopup(auth, googleProvider);
+      return;
+    }
+    const guestName = document.querySelector("#guest-name").value.trim();
+    const guestLocation = document.querySelector("#guest-location").value.trim();
+    const guestPreference = document.querySelector("#guest-preference").value.trim();
+    if (!guestName || !guestLocation || !guestPreference) {
+      setStatus("Add your name, location, and what you would like to do.");
+      return;
+    }
+    setStatus("Adding your vote and comparing the whole group…", "loading");
+    try {
+      const participant = {
+        uid: currentUser.uid,
+        name: guestName,
+        location: guestLocation,
+        preference: guestPreference,
+      };
+      await updateDoc(roomRef, { participants: arrayUnion(participant) });
+      const participants = [...(latestRoom?.participants || []), participant];
+      const combinedPreference = [...new Set(participants.map((person) => person.preference))]
+        .join(" or ");
+      const response = await fetch("/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participants,
+          query: combinedPreference,
+          meetingTime: latestRoom.meetingTime,
+          travelMode: latestRoom.travelMode,
+          maxMinutes: latestRoom.maxMinutes,
+        }),
+      });
+      const resultsData = await response.json();
+      if (!response.ok) throw new Error(resultsData.error || "Recommendation failed");
+      await updateDoc(roomRef, { results: resultsData, selectedQuery: combinedPreference });
+      renderResults(resultsData, participants.map((person) => person.name));
+    } catch (error) {
+      setStatus(error.message);
+    }
+  });
+}
+
 const invitationMatch = window.location.pathname.match(/^\/m\/([A-Za-z0-9_-]+)$/);
 if (invitationMatch) loadInvitation(invitationMatch[1]);
+const roomMatch = window.location.pathname.match(/^\/r\/([A-Za-z0-9_-]+)$/);
+if (roomMatch) loadGroupRoom(roomMatch[1]);

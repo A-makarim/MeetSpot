@@ -13,6 +13,10 @@
   <body>
     <header class="nav">
       <a class="brand" href="/"><span>●</span> MeetSpot</a>
+      <nav class="page-tabs" aria-label="Main navigation">
+        <button class="tab-button active" data-tab="find" type="button">Find a spot</button>
+        <button class="tab-button" data-tab="profile" type="button">Profile</button>
+      </nav>
       <div class="nav-actions">
         <span class="badge">Live Google results</span>
         <button id="auth-button" class="auth-button" type="button">Sign in with Google</button>
@@ -20,7 +24,7 @@
     </header>
 
     <main>
-      <section id="profile-panel" class="profile-panel hidden">
+      <section id="profile-panel" class="profile-panel page-view hidden" data-page="profile">
         <div class="profile-heading">
           <div>
             <p class="eyebrow">YOUR MEETSPOT PROFILE</p>
@@ -28,7 +32,7 @@
           </div>
           <div class="nav-actions">
             <button id="sign-out" class="secondary-button" type="button">Sign out</button>
-            <button id="close-profile" class="secondary-button" type="button">Close</button>
+            <button id="close-profile" class="secondary-button" type="button">Back to search</button>
           </div>
         </div>
         <p class="profile-intro">Set hard requirements and preferences once. You can change them whenever you want.</p>
@@ -79,16 +83,17 @@
             <input id="timeline-file" type="file" accept=".json,application/json" />
           </label>
           <p id="timeline-status" class="timeline-status"></p>
+          <div id="timeline-places" class="timeline-places hidden"></div>
         </div>
       </section>
 
-      <section class="hero">
+      <section class="hero page-view" data-page="find">
         <p class="eyebrow">NO MORE “WHERE SHOULD WE MEET?”</p>
         <h1>A place that works<br /><em>for both of you.</em></h1>
         <p class="intro">Tell us where you're coming from and what you're looking for. We’ll find real places with fair journey times.</p>
       </section>
 
-      <section class="planner">
+      <section class="planner page-view" data-page="find">
         <form id="search-form">
           <div class="people-grid">
             <label>
@@ -136,11 +141,11 @@
         </form>
         <div class="invite-row">
           <div>
-            <strong>Don't know their location?</strong>
-            <span>Create a link so they can share it themselves.</span>
+            <strong>Planning with a group?</strong>
+            <span>Create one room link. Everyone adds their own location and preference.</span>
           </div>
           <input id="organizer-name" maxlength="50" placeholder="Your name" />
-          <button id="create-meeting" type="button">Create invite link →</button>
+          <button id="create-meeting" type="button">Create group room →</button>
         </div>
         <div id="invite-link" class="invite-link hidden"></div>
       </section>
@@ -158,7 +163,12 @@
           <input id="guest-location" placeholder="Address, station, or postcode" />
           <button class="location-button" type="button" data-location-target="guest-location">◎ Use my current location</button>
         </label>
-        <button id="join-meeting" type="button">Share location and find our spot →</button>
+        <label class="request">
+          <span>What would you like to do?</span>
+          <input id="guest-preference" placeholder="e.g. coffee, bowling, Japanese food" />
+        </label>
+        <button id="join-meeting" type="button">Join room and add my vote →</button>
+        <div id="room-members" class="room-members"></div>
       </section>
 
       <section id="status" class="status hidden" aria-live="polite"></section>
