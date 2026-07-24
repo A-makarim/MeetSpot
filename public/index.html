@@ -15,6 +15,7 @@
       <a class="brand" href="/"><span>●</span> MeetSpot</a>
       <nav class="page-tabs" aria-label="Main navigation">
         <button class="tab-button active" data-tab="find" type="button">Find a spot</button>
+        <button class="tab-button" data-tab="group" type="button">Group room</button>
         <button class="tab-button" data-tab="profile" type="button">Profile</button>
       </nav>
       <div class="nav-actions">
@@ -139,15 +140,57 @@
             <button type="submit"><span>Find our spot</span><span>→</span></button>
           </div>
         </form>
-        <div class="invite-row">
-          <div>
-            <strong>Planning with a group?</strong>
-            <span>Create one room link. Everyone adds their own location and preference.</span>
-          </div>
-          <input id="organizer-name" maxlength="50" placeholder="Your name" />
-          <button id="create-meeting" type="button">Create group room →</button>
+      </section>
+
+      <section class="page-view hidden" data-page="group">
+        <div class="hero compact-hero">
+          <p class="eyebrow">PLAN WITH EVERYONE</p>
+          <h2>Create one shared meeting room.</h2>
+          <p class="intro">You start the room. Everyone else uses the same link to add their own location and preference.</p>
         </div>
-        <div id="invite-link" class="invite-link hidden"></div>
+        <div class="planner">
+          <div class="people-grid">
+            <label>
+              <span>Your name</span>
+              <input id="organizer-name" maxlength="50" placeholder="e.g. Abdul" />
+            </label>
+            <label>
+              <span>Your starting point</span>
+              <input id="group-location" placeholder="Address, station, or postcode" />
+              <button class="location-button" type="button" data-location-target="group-location">◎ Use my current location</button>
+            </label>
+          </div>
+          <label class="request">
+            <span>What would you like to do?</span>
+            <input id="group-preference" placeholder="e.g. coffee with indoor seating" />
+          </label>
+          <div class="controls group-controls">
+            <label>
+              <span>Meeting time</span>
+              <input id="group-meeting-time" type="datetime-local" />
+            </label>
+            <label>
+              <span>Travel mode</span>
+              <select id="group-travel-mode">
+                <option value="TRANSIT">Public transport</option>
+                <option value="WALK">Walking</option>
+                <option value="DRIVE">Driving</option>
+                <option value="BICYCLE">Cycling</option>
+              </select>
+            </label>
+            <label>
+              <span>Maximum journey</span>
+              <select id="group-max-minutes">
+                <option value="20">20 minutes</option>
+                <option value="30" selected>30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+            </label>
+            <button id="create-meeting" type="button">Create group room →</button>
+          </div>
+          <div id="invite-link" class="invite-link hidden"></div>
+        </div>
       </section>
 
       <section id="join-panel" class="planner join-panel hidden">

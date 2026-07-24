@@ -42,6 +42,7 @@ const cards = document.querySelector("#cards");
 const summary = document.querySelector("#route-summary");
 const weatherBox = document.querySelector("#weather");
 const meetingInput = document.querySelector("#meeting-time");
+const groupMeetingInput = document.querySelector("#group-meeting-time");
 const profilePanel = document.querySelector("#profile-panel");
 const authButton = document.querySelector("#auth-button");
 
@@ -54,6 +55,7 @@ defaultMeetingTime.setMinutes(
 meetingInput.value = new Date(
   defaultMeetingTime.getTime() - defaultMeetingTime.getTimezoneOffset() * 60000
 ).toISOString().slice(0, 16);
+groupMeetingInput.value = meetingInput.value;
 
 const profileFields = [
   "dietary",
@@ -398,29 +400,35 @@ form.addEventListener("submit", async (event) => {
 });
 
 document.querySelector("#create-meeting").addEventListener("click", async () => {
-  const payload = formPayload();
   const organizerName = document.querySelector("#organizer-name").value.trim();
-  if (!organizerName || !payload.personA || !payload.query || !meetingInput.value) {
+  const organizerLocation = document.querySelector("#group-location").value.trim();
+  const preference = document.querySelector("#group-preference").value.trim();
+  const meetingTime = groupMeetingInput.value
+    ? new Date(groupMeetingInput.value).toISOString()
+    : "";
+  const travelMode = document.querySelector("#group-travel-mode").value;
+  const maxMinutes = Number(document.querySelector("#group-max-minutes").value);
+  if (!organizerName || !organizerLocation || !preference || !meetingTime) {
     setStatus("Add your name, your location, the request, and meeting time first.");
     return;
   }
   if (!currentUser) {
     setStatus("Sign in with Google first so the group room can be saved.");
-    await signInWithPopup(auth, googleProvider);
+    currentUser = (await signInWithPopup(auth, googleProvider)).user;
   }
   setStatus("Creating your group room…", "loading");
   try {
     const room = await addDoc(collection(firestore, "meetings"), {
       organizerUid: currentUser.uid,
       organizerName,
-      meetingTime: payload.meetingTime,
-      travelMode: payload.travelMode,
-      maxMinutes: Number(payload.maxMinutes),
+      meetingTime,
+      travelMode,
+      maxMinutes,
       participants: [{
         uid: currentUser.uid,
         name: organizerName,
-        location: payload.personA,
-        preference: payload.query,
+        location: organizerLocation,
+        preference,
       }],
       createdAt: serverTimestamp(),
     });
@@ -438,7 +446,11 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
     });
     statusBox.classList.add("hidden");
   } catch (error) {
-    setStatus(error.message);
+    setStatus(
+      error.code === "permission-denied"
+        ? "Group rooms need the updated Firestore meeting rules. Open Firebase → Firestore → Rules and publish the rules provided below."
+        : error.message
+    );
   }
 });
 

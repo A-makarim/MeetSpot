@@ -36,6 +36,9 @@ main { max-width: 1060px; margin: auto; padding: 54px 28px 80px; }
 .room-members { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 18px; }
 .room-members p { margin: 7px 0; color: var(--muted); }
 .hero { max-width: 770px; margin-bottom: 42px; }
+.compact-hero { margin-bottom: 24px; }
+.compact-hero h2 { font-size: clamp(34px, 5vw, 54px); }
+.group-controls { grid-template-columns: 1.25fr 1fr 1fr 1.15fr; }
 .eyebrow { color: var(--green); font-weight: 700; font-size: 12px; letter-spacing: .14em; margin: 0 0 13px; }
 h1 { font-family: Manrope; font-size: clamp(48px, 7vw, 82px); line-height: .98; letter-spacing: -.055em; margin: 0; }
 h1 em { color: var(--green); font-style: normal; }
