@@ -31,6 +31,7 @@ const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 let currentUser = null;
+let currentProfileData = null;
 
 const form = document.querySelector("#search-form");
 const planner = document.querySelector(".planner");
@@ -41,6 +42,7 @@ const results = document.querySelector("#results");
 const cards = document.querySelector("#cards");
 const summary = document.querySelector("#route-summary");
 const weatherBox = document.querySelector("#weather");
+const aiChoiceBox = document.querySelector("#ai-choice");
 const meetingInput = document.querySelector("#meeting-time");
 const groupMeetingInput = document.querySelector("#group-meeting-time");
 const profilePanel = document.querySelector("#profile-panel");
@@ -65,6 +67,18 @@ const profileFields = [
   "budget",
   "atmosphere",
 ];
+
+async function safeProfileSnapshot() {
+  if (!currentUser) return { preferences: {}, timelineSummary: null };
+  if (!currentProfileData) {
+    const snapshot = await getDoc(doc(firestore, "users", currentUser.uid));
+    currentProfileData = snapshot.exists() ? snapshot.data() : {};
+  }
+  return {
+    preferences: currentProfileData.preferences || {},
+    timelineSummary: currentProfileData.timelineSummary || null,
+  };
+}
 
 function showProfile() {
   showPage("profile");
@@ -110,9 +124,11 @@ function renderTimelineSummary(timeline) {
 async function loadProfile(user) {
   const snapshot = await getDoc(doc(firestore, "users", user.uid));
   if (!snapshot.exists()) {
+    currentProfileData = null;
     showProfile();
     return;
   }
+  currentProfileData = snapshot.data();
   const profile = snapshot.data().preferences || {};
   profileFields.forEach((field) => {
     if (profile[field] != null) document.querySelector(`#${field}`).value = profile[field];
@@ -124,6 +140,7 @@ async function loadProfile(user) {
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   if (!user) {
+    currentProfileData = null;
     authButton.textContent = "Sign in with Google";
     profilePanel.classList.add("hidden");
     return;
@@ -300,6 +317,18 @@ function renderResults(data, participantNames = ["A", "B"]) {
   }
   statusBox.classList.add("hidden");
   summary.textContent = "Private locations · shared journey comparison";
+  if (data.aiDecision) {
+    aiChoiceBox.innerHTML = `
+      <div class="ai-kicker">✦ GEMINI GROUP PICK</div>
+      <h2>${escapeHtml(data.aiDecision.selectedPlace)}</h2>
+      <strong>${escapeHtml(data.aiDecision.headline)}</strong>
+      <p>${escapeHtml(data.aiDecision.reason)}</p>
+      <small>Trade-off: ${escapeHtml(data.aiDecision.tradeoff)}</small>
+    `;
+    aiChoiceBox.classList.remove("hidden");
+  } else {
+    aiChoiceBox.classList.add("hidden");
+  }
   weatherBox.innerHTML = data.weather
     ? `
       ${data.weather.icon ? `<img src="${escapeHtml(data.weather.icon)}" alt="" />` : ""}
@@ -309,7 +338,16 @@ function renderResults(data, participantNames = ["A", "B"]) {
       </div>
     `
     : "<div><strong>Weather unavailable</strong></div>";
-  cards.innerHTML = data.recommendations
+  const orderedRecommendations = data.aiDecision
+    ? [...data.recommendations].sort((a, b) =>
+        a.id === data.aiDecision.selectedPlaceId
+          ? -1
+          : b.id === data.aiDecision.selectedPlaceId
+            ? 1
+            : 0
+      )
+    : data.recommendations;
+  cards.innerHTML = orderedRecommendations
     .map(
       (place, index) => `
       <article class="card">
@@ -419,6 +457,7 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
   }
   setStatus("Creating your group room…", "loading");
   try {
+    const profile = await safeProfileSnapshot();
     const room = await addDoc(collection(firestore, "meetings"), {
       organizerUid: currentUser.uid,
       organizerName,
@@ -431,6 +470,7 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
         name: organizerName,
         location: organizerLocation,
         preference,
+        profile,
       }],
       createdAt: serverTimestamp(),
     });
@@ -571,11 +611,13 @@ async function loadGroupRoom(roomId) {
     }
     setStatus("Adding your vote and comparing the whole group…", "loading");
     try {
+      const profile = await safeProfileSnapshot();
       const participant = {
         uid: currentUser.uid,
         name: guestName,
         location: guestLocation,
         preference: guestPreference,
+        profile,
       };
       const existingParticipants = latestRoom?.participants || [];
       if (existingParticipants.some((person) => person.uid === currentUser.uid)) {

@@ -69,6 +69,11 @@ button:hover { background: var(--green); }
 @keyframes spin { to { transform: rotate(360deg); } }
 .hidden { display: none; }
 .results { margin-top: 60px; }
+.ai-choice { background: var(--ink); color: white; border-radius: 20px; padding: 26px; margin-bottom: 18px; }
+.ai-choice .ai-kicker { color: var(--lime); font-size: 12px; font-weight: 800; letter-spacing: .13em; margin-bottom: 10px; }
+.ai-choice h2 { color: white; margin-bottom: 8px; }
+.ai-choice p { color: #dfe7e1; margin: 8px 0; line-height: 1.55; }
+.ai-choice small { color: #aebdb3; }
 .weather { display: flex; align-items: center; gap: 16px; background: #eaf4ed; border: 1px solid #cfe1d4; border-radius: 16px; padding: 15px 18px; margin-bottom: 22px; }
 .weather img { width: 42px; height: 42px; }
 .weather strong, .weather span { display: block; }
