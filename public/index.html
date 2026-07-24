@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Find a fair meeting place for two people." />
+    <title>MeetSpot — meet somewhere that works</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <a class="brand" href="/"><span>●</span> MeetSpot</a>
+      <span class="badge">Live Google results</span>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">NO MORE “WHERE SHOULD WE MEET?”</p>
+        <h1>A place that works<br /><em>for both of you.</em></h1>
+        <p class="intro">Tell us where you're coming from and what you're looking for. We’ll find real places with fair journey times.</p>
+      </section>
+
+      <section class="planner">
+        <form id="search-form">
+          <div class="people-grid">
+            <label>
+              <span><b class="person a">A</b> Your starting point</span>
+              <input id="person-a" placeholder="e.g. UCL, London" required />
+            </label>
+            <label>
+              <span><b class="person b">B</b> Their starting point</span>
+              <input id="person-b" placeholder="e.g. London Bridge" required />
+            </label>
+          </div>
+
+          <label class="request">
+            <span>What do you want to find?</span>
+            <input id="query" placeholder="e.g. a relaxed Japanese restaurant" required />
+          </label>
+
+          <div class="controls">
+            <label>
+              <span>Travel mode</span>
+              <select id="travel-mode">
+                <option value="TRANSIT">Public transport</option>
+                <option value="WALK">Walking</option>
+                <option value="DRIVE">Driving</option>
+                <option value="BICYCLE">Cycling</option>
+              </select>
+            </label>
+            <label>
+              <span>Maximum journey</span>
+              <select id="max-minutes">
+                <option value="20">20 minutes</option>
+                <option value="30" selected>30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+            </label>
+            <button type="submit"><span>Find our spot</span><span>→</span></button>
+          </div>
+        </form>
+      </section>
+
+      <section id="status" class="status hidden" aria-live="polite"></section>
+      <section id="results" class="results hidden">
+        <div class="results-heading">
+          <div><p class="eyebrow">BEST COMPROMISES</p><h2>Your meeting spots</h2></div>
+          <p id="route-summary"></p>
+        </div>
+        <div id="cards" class="cards"></div>
+      </section>
+    </main>
+    <footer>Powered by Google Maps Platform</footer>
+    <script src="/app.js"></script>
+  </body>
+</html>

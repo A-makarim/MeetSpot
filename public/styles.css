@@ -1,0 +1,62 @@
+:root {
+  --ink: #16211b;
+  --muted: #657168;
+  --paper: #f5f4ed;
+  --card: #fffefa;
+  --lime: #c9f36a;
+  --green: #235b43;
+  --orange: #ff7657;
+  --line: #dcded5;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: "DM Sans", sans-serif; }
+.nav { height: 74px; display: flex; align-items: center; justify-content: space-between; max-width: 1160px; padding: 0 28px; margin: auto; }
+.brand { color: var(--ink); text-decoration: none; font-family: Manrope; font-size: 22px; font-weight: 800; }
+.brand span { color: var(--orange); font-size: 29px; vertical-align: -2px; }
+.badge { border: 1px solid var(--line); border-radius: 30px; padding: 8px 13px; color: var(--muted); font-size: 12px; }
+main { max-width: 1060px; margin: auto; padding: 54px 28px 80px; }
+.hero { max-width: 770px; margin-bottom: 42px; }
+.eyebrow { color: var(--green); font-weight: 700; font-size: 12px; letter-spacing: .14em; margin: 0 0 13px; }
+h1 { font-family: Manrope; font-size: clamp(48px, 7vw, 82px); line-height: .98; letter-spacing: -.055em; margin: 0; }
+h1 em { color: var(--green); font-style: normal; }
+.intro { max-width: 630px; color: var(--muted); font-size: 18px; line-height: 1.6; }
+.planner { background: var(--card); padding: 28px; border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 18px 60px rgba(30,50,40,.08); }
+.people-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+label span { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.person { display: inline-grid; place-items: center; width: 25px; height: 25px; border-radius: 50%; margin-right: 6px; }
+.person.a { background: var(--lime); }.person.b { background: #ffd19c; }
+input, select { width: 100%; border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 15px; font: inherit; color: var(--ink); outline: none; }
+input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(35,91,67,.1); }
+.request { display: block; margin: 20px 0; }
+.request input { font-size: 17px; padding: 18px; }
+.controls { display: grid; grid-template-columns: 1fr 1fr 1.25fr; gap: 14px; align-items: end; }
+button { border: 0; border-radius: 12px; padding: 16px 20px; font: inherit; font-weight: 700; background: var(--ink); color: white; display: flex; justify-content: space-between; cursor: pointer; }
+button:hover { background: var(--green); }
+.status { margin: 28px 0; padding: 20px; border-radius: 14px; text-align: center; background: white; border: 1px solid var(--line); }
+.status.loading::before { content: ""; display: inline-block; width: 13px; height: 13px; border: 2px solid var(--line); border-top-color: var(--green); border-radius: 50%; margin-right: 10px; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hidden { display: none; }
+.results { margin-top: 60px; }
+.results-heading { display: flex; align-items: end; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+h2 { font-family: Manrope; font-size: 34px; margin: 0; letter-spacing: -.03em; }
+.results-heading > p { color: var(--muted); max-width: 420px; text-align: right; }
+.cards { display: grid; gap: 14px; margin-top: 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: grid; grid-template-columns: 46px 1fr auto; gap: 18px; align-items: center; }
+.rank { width: 44px; height: 44px; background: var(--lime); border-radius: 50%; display: grid; place-items: center; font-family: Manrope; font-weight: 800; }
+.card h3 { margin: 0 0 5px; font-family: Manrope; font-size: 20px; }
+.address, .why { margin: 4px 0; color: var(--muted); font-size: 14px; }
+.why { color: var(--green); font-weight: 600; }
+.rating { font-size: 13px; margin-left: 8px; color: #8b6500; }
+.journeys { display: flex; gap: 8px; margin-top: 12px; }
+.journey { background: #f0f1ea; border-radius: 8px; padding: 7px 10px; font-size: 13px; }
+.maps-link { text-decoration: none; color: var(--ink); border: 1px solid var(--line); padding: 10px 13px; border-radius: 9px; font-weight: 700; white-space: nowrap; }
+footer { text-align: center; color: var(--muted); font-size: 12px; padding: 30px; }
+@media (max-width: 700px) {
+  main { padding-top: 32px; }
+  .people-grid, .controls { grid-template-columns: 1fr; }
+  .card { grid-template-columns: 38px 1fr; }
+  .maps-link { grid-column: 2; width: fit-content; }
+  .results-heading { display: block; }
+  .results-heading > p { text-align: left; }
+  .badge { display: none; }
+}
