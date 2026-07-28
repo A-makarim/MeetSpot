@@ -2,7 +2,7 @@
 # Secret values live in Google Cloud Secret Manager; this file contains references only.
 runConfig:
   minInstances: 0
-  maxInstances: 3
+  maxInstances: 1
   concurrency: 80
   cpu: 1
   memoryMiB: 512
