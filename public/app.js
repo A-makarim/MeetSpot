@@ -20,12 +20,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const firebaseApp = initializeApp({
-  apiKey: "AIzaSyCKaLW7BHJVj7VUvi1MbrkjmB3rwcuADEQ",
-  authDomain: "uk-stud-ai-hack26lhr-5702.firebaseapp.com",
-  projectId: "uk-stud-ai-hack26lhr-5702",
-  storageBucket: "uk-stud-ai-hack26lhr-5702.firebasestorage.app",
-  messagingSenderId: "234754526011",
-  appId: "1:234754526011:web:d7ba91c97a7bb78dd7451e",
+  apiKey: "AIzaSyCapH0SWwcaeWKcA-Brc-91_eahvdFrB2M",
+  authDomain: "meetspot-production.firebaseapp.com",
+  projectId: "meetspot-production",
+  storageBucket: "meetspot-production.firebasestorage.app",
+  messagingSenderId: "454339875032",
+  appId: "1:454339875032:web:ea162dc9e0522f2234c7ad",
 });
 const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
