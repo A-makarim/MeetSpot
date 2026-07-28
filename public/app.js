@@ -23,7 +23,7 @@ import {
 
 const firebaseApp = initializeApp({
   apiKey: "AIzaSyCapH0SWwcaeWKcA-Brc-91_eahvdFrB2M",
-  authDomain: "meetspot-production.firebaseapp.com",
+  authDomain: "meetspot--meetspot-production.us-east4.hosted.app",
   projectId: "meetspot-production",
   storageBucket: "meetspot-production.firebasestorage.app",
   messagingSenderId: "454339875032",
