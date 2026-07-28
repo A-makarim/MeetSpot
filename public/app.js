@@ -1,9 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import {
   getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
@@ -47,6 +49,10 @@ const meetingInput = document.querySelector("#meeting-time");
 const groupMeetingInput = document.querySelector("#group-meeting-time");
 const profilePanel = document.querySelector("#profile-panel");
 const authButton = document.querySelector("#auth-button");
+
+getRedirectResult(auth).catch((error) => {
+  setStatus(`Google sign-in failed: ${error.message}`);
+});
 
 const defaultMeetingTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
 defaultMeetingTime.setMinutes(
@@ -159,8 +165,12 @@ authButton.addEventListener("click", async () => {
     return;
   }
   try {
-    await signInWithPopup(auth, googleProvider);
+    authButton.disabled = true;
+    authButton.textContent = "Opening Google sign-in…";
+    await signInWithRedirect(auth, googleProvider);
   } catch (error) {
+    authButton.disabled = false;
+    authButton.textContent = "Sign in with Google";
     setStatus(`Google sign-in failed: ${error.message}`);
   }
 });
