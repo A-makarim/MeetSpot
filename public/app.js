@@ -1,11 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import {
   getAuth,
-  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
-  signInWithRedirect,
   signOut,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
@@ -23,7 +21,7 @@ import {
 
 const firebaseApp = initializeApp({
   apiKey: "AIzaSyCapH0SWwcaeWKcA-Brc-91_eahvdFrB2M",
-  authDomain: "meetspot--meetspot-production.us-east4.hosted.app",
+  authDomain: "meetspot-production.firebaseapp.com",
   projectId: "meetspot-production",
   storageBucket: "meetspot-production.firebasestorage.app",
   messagingSenderId: "454339875032",
@@ -49,10 +47,6 @@ const meetingInput = document.querySelector("#meeting-time");
 const groupMeetingInput = document.querySelector("#group-meeting-time");
 const profilePanel = document.querySelector("#profile-panel");
 const authButton = document.querySelector("#auth-button");
-
-getRedirectResult(auth).catch((error) => {
-  setStatus(`Google sign-in failed: ${error.message}`);
-});
 
 const defaultMeetingTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
 defaultMeetingTime.setMinutes(
@@ -167,7 +161,8 @@ authButton.addEventListener("click", async () => {
   try {
     authButton.disabled = true;
     authButton.textContent = "Opening Google sign-in…";
-    await signInWithRedirect(auth, googleProvider);
+    await signInWithPopup(auth, googleProvider);
+    authButton.disabled = false;
   } catch (error) {
     authButton.disabled = false;
     authButton.textContent = "Sign in with Google";
