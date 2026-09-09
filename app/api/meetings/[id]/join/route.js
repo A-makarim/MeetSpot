@@ -7,12 +7,14 @@ export async function POST(request, { params }) {
     const { id } = await params;
     const meeting = await readMeetingToken(id);
     const body = await request.json();
-    if (!body.guestName || !body.guestLocation) {
+    const guestName = String(body.guestName || "").trim().slice(0, 50);
+    const guestLocation = String(body.guestLocation || "").trim().slice(0, 200);
+    if (!guestName || !guestLocation) {
       return NextResponse.json({ error: "Your name and location are required" }, { status: 400 });
     }
     const results = await buildRecommendations({
       personA: meeting.organizerLocation,
-      personB: body.guestLocation,
+      personB: guestLocation,
       query: meeting.query,
       travelMode: meeting.travelMode,
       maxMinutes: meeting.maxMinutes,
