@@ -4,6 +4,10 @@ A working two-person meeting-place recommender using live Google Maps Platform
 data. It geocodes two starting points, searches real places, calculates journeys
 for both people, filters by maximum journey time, and ranks fair options.
 
+## Live demo
+
+**https://meetspot--meetspot-production.us-east4.hosted.app/**
+
 ## Run
 
 1. Copy `.env.example` to `.env`.
