@@ -479,7 +479,7 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
       }],
       createdAt: serverTimestamp(),
     });
-    const url = `${window.location.origin}/?room=${encodeURIComponent(room.id)}`;
+    const url = `${window.location.origin}/r/${encodeURIComponent(room.id)}`;
     const invite = document.querySelector("#invite-link");
     invite.innerHTML = `
       <strong>Group room ready.</strong> Send the same link to everyone:<br />
@@ -496,7 +496,7 @@ document.querySelector("#create-meeting").addEventListener("click", async () => 
     });
     document.querySelector(".open-room").addEventListener("click", (event) => {
       event.preventDefault();
-      history.pushState({}, "", `/?room=${encodeURIComponent(room.id)}`);
+      history.pushState({}, "", `/r/${encodeURIComponent(room.id)}`);
       loadGroupRoom(room.id);
     });
     statusBox.classList.add("hidden");
